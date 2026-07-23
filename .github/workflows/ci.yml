@@ -1,0 +1,61 @@
+name: CI
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: clinic_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./clinic-api
+
+      - name: Run linter (golangci-lint)
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./clinic-api
+
+      - name: Apply test migrations
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          migrate -path ./migrations -database "$TEST_DATABASE_URL" up
+        working-directory: ./clinic-api
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/clinic_test?sslmode=disable
+
+      - name: Run tests
+        run: go test -race -coverprofile=coverage.out ./...
+        working-directory: ./clinic-api
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/clinic_test?sslmode=disable
+          SUPABASE_JWT_SECRET: test-secret-for-ci
+
+      - name: Check coverage >= 80%
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | awk '{print $3}' | tr -d '%')
+          echo "Coverage: $COVERAGE%"
+          awk "BEGIN { exit ($COVERAGE < 80) }"
+        working-directory: ./clinic-api

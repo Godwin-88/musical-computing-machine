@@ -1,0 +1,76 @@
+name: CD
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: clinic_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: ./clinic-api
+
+      - name: Run linter (golangci-lint)
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          working-directory: ./clinic-api
+
+      - name: Apply test migrations
+        run: |
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          migrate -path ./migrations -database "$TEST_DATABASE_URL" up
+        working-directory: ./clinic-api
+        env:
+          TEST_DATABASE_URL: postgres://postgres:postgres@localhost:5432/clinic_test?sslmode=disable
+
+      - name: Run tests
+        run: go test -race -coverprofile=coverage.out ./...
+        working-directory: ./clinic-api
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/clinic_test?sslmode=disable
+          SUPABASE_JWT_SECRET: test-secret-for-ci
+
+  deploy-api:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_API_DEPLOY_HOOK }}" \
+            -H "Content-Type: application/json"
+
+  deploy-admin:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Next.js to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'

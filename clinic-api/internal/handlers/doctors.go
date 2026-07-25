@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -78,6 +79,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.doctorRepo.Create(r.Context(), doctor); err != nil {
+		log.Printf("ERROR creating doctor: %v", err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -93,6 +95,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 func (h *DoctorHandler) List(w http.ResponseWriter, r *http.Request) {
 	doctors, err := h.doctorRepo.GetAll(r.Context())
 	if err != nil {
+		log.Printf("ERROR listing doctors: %v", err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -139,6 +142,7 @@ func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	doctor, err := h.doctorRepo.GetByID(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR getting doctor %s: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -155,6 +159,7 @@ func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	wh, err := h.doctorRepo.GetWorkingHours(r.Context(), doctor.ID)
 	if err != nil {
+		log.Printf("ERROR getting working hours for doctor %s: %v", doctor.ID, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -220,6 +225,7 @@ func (h *DoctorHandler) Update(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(errResp)
 			return
 		}
+		log.Printf("ERROR updating doctor %s: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -242,6 +248,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 	// Verify doctor exists
 	doctor, err := h.doctorRepo.GetByID(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR getting doctor %s for setWorkingHours: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -327,6 +334,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if err := h.doctorRepo.SetWorkingHours(r.Context(), id, req.WorkingHours); err != nil {
+		log.Printf("ERROR setting working hours for doctor %s: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -337,6 +345,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 	// Return updated working hours
 	wh, err := h.doctorRepo.GetWorkingHours(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR getting working hours after set for doctor %s: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -387,6 +396,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 	// Verify doctor exists
 	doctor, err := h.doctorRepo.GetByID(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR getting doctor %s for availability: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -404,6 +414,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 	// Get working hours
 	wh, err := h.doctorRepo.GetWorkingHours(r.Context(), id)
 	if err != nil {
+		log.Printf("ERROR getting working hours for doctor %s availability: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
@@ -414,6 +425,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 	// Get booked slots
 	bookedSlots, err := h.appointRepo.GetBookedSlotsForDate(r.Context(), id, date)
 	if err != nil {
+		log.Printf("ERROR getting booked slots for doctor %s on %s: %v", id, dateStr, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)

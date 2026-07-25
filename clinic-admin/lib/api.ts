@@ -1,5 +1,3 @@
-import { createBrowserSupabaseClient } from "./supabase";
-
 export interface ApiError {
   error: {
     code: string;
@@ -62,27 +60,14 @@ export interface AvailabilityResponse {
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-async function getAccessToken(): Promise<string | null> {
-  const supabase = createBrowserSupabaseClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  return session?.access_token || null;
-}
-
 async function apiFetch<T>(
   path: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = await getAccessToken();
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   const response = await fetch(`${API_URL}${path}`, {
     ...options,

@@ -1,3 +1,8 @@
+-- NOTE: RLS policies are optional when the API connects directly via pgx (service role).
+-- They provide defense-in-depth if the frontend ever queries Supabase directly.
+-- The API currently connects using the connection string in DATABASE_URL,
+-- which bypasses RLS. These policies are kept as documentation for future use.
+
 -- Enable RLS on all tables
 ALTER TABLE doctors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE working_hours ENABLE ROW LEVEL SECURITY;

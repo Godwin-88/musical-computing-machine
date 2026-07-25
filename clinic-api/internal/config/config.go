@@ -9,10 +9,9 @@ import (
 )
 
 type Config struct {
-	DatabaseURL       string
-	SupabaseJWTSecret string
-	Port              string
-	AppEnv            string
+	DatabaseURL string
+	Port        string
+	AppEnv      string
 }
 
 func Load() *Config {
@@ -20,17 +19,13 @@ func Load() *Config {
 	_ = godotenv.Load()
 
 	cfg := &Config{
-		DatabaseURL:       os.Getenv("DATABASE_URL"),
-		SupabaseJWTSecret: os.Getenv("SUPABASE_JWT_SECRET"),
-		Port:              os.Getenv("PORT"),
-		AppEnv:            os.Getenv("APP_ENV"),
+		DatabaseURL: os.Getenv("DATABASE_URL"),
+		Port:        os.Getenv("PORT"),
+		AppEnv:      os.Getenv("APP_ENV"),
 	}
 
 	if cfg.DatabaseURL == "" {
 		log.Fatal("DATABASE_URL is required")
-	}
-	if cfg.SupabaseJWTSecret == "" {
-		log.Fatal("SUPABASE_JWT_SECRET is required")
 	}
 	if cfg.Port == "" {
 		cfg.Port = "8080"

@@ -29,7 +29,7 @@ func (r *PatientRepo) Create(ctx context.Context, patient *models.Patient) error
 func (r *PatientRepo) GetByEmail(ctx context.Context, email string) (*models.Patient, error) {
 	var p models.Patient
 	err := r.pool.QueryRow(ctx,
-		`SELECT id, auth_user_id, name, email, phone, created_at
+		`SELECT id, auth_user_id::text, name, email, phone, created_at
 		 FROM patients WHERE email = $1`, email,
 	).Scan(&p.ID, &p.AuthUserID, &p.Name, &p.Email, &p.Phone, &p.CreatedAt)
 	if err != nil {
@@ -44,7 +44,7 @@ func (r *PatientRepo) GetByEmail(ctx context.Context, email string) (*models.Pat
 func (r *PatientRepo) GetByID(ctx context.Context, id string) (*models.Patient, error) {
 	var p models.Patient
 	err := r.pool.QueryRow(ctx,
-		`SELECT id, auth_user_id, name, email, phone, created_at
+		`SELECT id, auth_user_id::text, name, email, phone, created_at
 		 FROM patients WHERE id = $1`, id,
 	).Scan(&p.ID, &p.AuthUserID, &p.Name, &p.Email, &p.Phone, &p.CreatedAt)
 	if err != nil {
@@ -57,7 +57,7 @@ func (r *PatientRepo) GetByID(ctx context.Context, id string) (*models.Patient, 
 }
 
 func (r *PatientRepo) GetAll(ctx context.Context, search string) ([]models.Patient, error) {
-	query := `SELECT id, auth_user_id, name, email, phone, created_at FROM patients`
+	query := `SELECT id, auth_user_id::text, name, email, phone, created_at FROM patients`
 	var args []interface{}
 	argIdx := 1
 

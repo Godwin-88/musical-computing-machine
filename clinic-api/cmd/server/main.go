@@ -47,6 +47,20 @@ func main() {
 	// Build router
 	r := chi.NewRouter()
 
+	// CORS middleware for development
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			if r.Method == http.MethodOptions {
+				w.WriteHeader(http.StatusOK)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
 	// Global middleware
 	r.Use(chiMiddleware.RequestID)
 	r.Use(chiMiddleware.RealIP)
@@ -69,33 +83,22 @@ func main() {
 		})
 	})
 
-	// Public routes
+	// All routes are public (no authentication required)
 	r.Get("/health", healthHandler.Check)
 	r.Get("/doctors", doctorHandler.List)
+	r.Post("/doctors", doctorHandler.Create)
 	r.Get("/doctors/{id}", doctorHandler.GetByID)
+	r.Put("/doctors/{id}", doctorHandler.Update)
+	r.Put("/doctors/{id}/working-hours", doctorHandler.SetWorkingHours)
 	r.Get("/doctors/{id}/availability", doctorHandler.GetAvailability)
-
-	// Protected routes (require clinic_admin role)
-	r.Group(func(r chi.Router) {
-		r.Use(middleware.AuthMiddleware(cfg.SupabaseJWTSecret))
-		r.Use(middleware.RequireRole("clinic_admin"))
-
-		// Doctor management
-		r.Post("/doctors", doctorHandler.Create)
-		r.Put("/doctors/{id}", doctorHandler.Update)
-		r.Put("/doctors/{id}/working-hours", doctorHandler.SetWorkingHours)
-
-		// Appointment management
-		r.Post("/appointments", appointmentHandler.Book)
-		r.Patch("/appointments/{id}/cancel", appointmentHandler.Cancel)
-		r.Patch("/appointments/{id}/reschedule", appointmentHandler.Reschedule)
-
-		// Patient management
-		r.Get("/patients", patientHandler.List)
-		r.Post("/patients", patientHandler.Create)
-		r.Get("/patients/{id}", patientHandler.GetByID)
-		r.Get("/patients/{id}/appointments", patientHandler.GetAppointments)
-	})
+	r.Post("/appointments", appointmentHandler.Book)
+	r.Patch("/appointments/{id}/cancel", appointmentHandler.Cancel)
+	r.Patch("/appointments/{id}/reschedule", appointmentHandler.Reschedule)
+	r.Get("/appointments", appointmentHandler.List)
+	r.Get("/patients", patientHandler.List)
+	r.Post("/patients", patientHandler.Create)
+	r.Get("/patients/{id}", patientHandler.GetByID)
+	r.Get("/patients/{id}/appointments", patientHandler.GetAppointments)
 
 	// Start server
 	addr := fmt.Sprintf(":%s", cfg.Port)

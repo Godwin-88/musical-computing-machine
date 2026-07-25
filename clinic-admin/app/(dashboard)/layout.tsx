@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@/lib/supabase";
 
 const navigation = [
   { name: "Doctors", href: "/doctors" },
@@ -15,14 +13,6 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
-
-  const handleSignOut = async () => {
-    const supabase = createBrowserSupabaseClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-  };
-
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar */}
@@ -41,14 +31,6 @@ export default function DashboardLayout({
             </Link>
           ))}
         </nav>
-        <div className="border-t p-4">
-          <button
-            onClick={handleSignOut}
-            className="w-full rounded-md bg-gray-100 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
-          >
-            Sign out
-          </button>
-        </div>
       </div>
 
       {/* Main content */}

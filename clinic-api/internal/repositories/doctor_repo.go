@@ -73,7 +73,7 @@ func (r *DoctorRepo) Update(ctx context.Context, id string, doctor *models.Docto
 
 func (r *DoctorRepo) GetWorkingHours(ctx context.Context, doctorID string) ([]models.WorkingHours, error) {
 	rows, err := r.pool.Query(ctx,
-		`SELECT id, doctor_id, day_of_week, start_time, end_time
+		`SELECT id, doctor_id, day_of_week, start_time::text, end_time::text
 		 FROM working_hours WHERE doctor_id = $1
 		 ORDER BY day_of_week`, doctorID)
 	if err != nil {

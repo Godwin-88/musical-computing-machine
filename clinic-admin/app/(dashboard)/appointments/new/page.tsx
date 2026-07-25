@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { listDoctors, getAvailability, listPatients, bookAppointment, Doctor, Slot, Patient } from "@/lib/api";
 
 type Step = "doctor" | "date" | "slot" | "patient" | "confirm";
 
-export default function NewAppointmentPage() {
+function NewAppointmentForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const preselectedPatientId = searchParams.get("patient_id");
@@ -232,5 +232,13 @@ export default function NewAppointmentPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function NewAppointmentPage() {
+  return (
+    <Suspense fallback={<div className="max-w-2xl mx-auto p-8 text-center text-gray-500">Loading...</div>}>
+      <NewAppointmentForm />
+    </Suspense>
   );
 }

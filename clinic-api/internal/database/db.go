@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -13,6 +14,10 @@ func Connect(ctx context.Context, databaseURL string) *pgxpool.Pool {
 	if err != nil {
 		log.Fatalf("Unable to parse database URL: %v", err)
 	}
+
+	// Use simple protocol to avoid prepared statement cache conflicts
+	// when using SET commands or other session-level operations
+	config.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeSimpleProtocol
 
 	pool, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {

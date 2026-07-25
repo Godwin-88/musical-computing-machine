@@ -1,6 +1,6 @@
 # Clinic Appointment Booking System
 
-A full-stack clinic appointment booking system built with Go, Supabase, and Next.js.
+A full-stack clinic appointment booking system built with Go, PostgreSQL, and Next.js.
 
 ## Architecture
 
@@ -13,27 +13,21 @@ graph TB
     subgraph "API Layer"
         GO[Go API<br/>Render / Docker]
         CHI[Chi Router]
-        JWT[JWT Auth Middleware]
     end
 
     subgraph "Database"
-        SUPABASE[Supabase<br/>PostgreSQL]
-        AUTH[Supabase Auth]
-        RLS[Row-Level Security]
+        PG[PostgreSQL<br/>Supabase / Docker]
     end
 
-    NEXT -->|HTTPS + Bearer JWT| GO
-    NEXT -->|Supabase JS SDK| AUTH
-    GO -->|pgx v5| SUPABASE
-    GO -->|JWT Validation| JWT
-    SUPABASE --> RLS
+    NEXT -->|HTTPS| GO
+    GO -->|pgx v5| PG
 
     classDef frontend fill:#e1f5fe,stroke:#0288d1
     classDef api fill:#fff3e0,stroke:#f57c00
     classDef db fill:#e8f5e9,stroke:#388e3c
     class NEXT frontend
-    class GO,CHI,JWT api
-    class SUPABASE,AUTH,RLS db
+    class GO,CHI api
+    class PG db
 ```
 
 ## Data Flow
@@ -42,23 +36,12 @@ graph TB
 sequenceDiagram
     participant Admin as Clinic Admin (Browser)
     participant Next as Next.js UI (Vercel)
-    participant Auth as Supabase Auth
     participant API as Go API (Render)
     participant DB as PostgreSQL (Supabase)
-
-    Note over Admin,DB: Authentication Flow
-    Admin->>Next: GET login page
-    Next->>Admin: Login form (email + password)
-    Admin->>Next: Submit credentials
-    Next->>Auth: signInWithPassword()
-    Auth-->>Next: JWT tokens
-    Next->>Next: Store session in cookie
-    Next-->>Admin: Redirect to dashboard
 
     Note over Admin,DB: Doctor Management Flow
     Admin->>Next: Click Add Doctor
     Next->>API: GET list doctors
-    API->>API: Validate JWT
     API->>DB: Query all doctors
     DB-->>API: doctor records
     API-->>Next: JSON array
@@ -66,7 +49,6 @@ sequenceDiagram
 
     Admin->>Next: Fill name + specialisation
     Next->>API: POST create doctor
-    API->>API: Validate role clinic_admin
     API->>DB: Insert doctor
     DB-->>API: Created record
     API-->>Next: 201 + doctor
@@ -164,8 +146,7 @@ sequenceDiagram
 │   │   │   ├── appointments.go
 │   │   │   ├── patients.go
 │   │   │   └── health.go
-│   │   ├── middleware/            # Auth + logging
-│   │   │   ├── auth.go            # JWT validation + role check
+│   │   ├── middleware/            # Logging only
 │   │   │   └── logger.go          # Request logging
 │   │   ├── models/                # Domain structs
 │   │   │   ├── doctor.go
@@ -190,8 +171,7 @@ sequenceDiagram
 │
 ├── clinic-admin/                  # Next.js Admin UI
 │   ├── app/
-│   │   ├── (auth)/login/         # Login page
-│   │   ├── (dashboard)/          # Protected pages
+│   │   ├── (dashboard)/          # Dashboard pages (public)
 │   │   │   ├── doctors/          # List, new, schedule editor
 │   │   │   ├── appointments/     # List, new booking flow
 │   │   │   └── patients/         # List, new, detail + history
@@ -203,9 +183,7 @@ sequenceDiagram
 │   │   ├── SlotPicker.tsx
 │   │   └── PatientForm.tsx
 │   ├── lib/
-│   │   ├── api.ts                # Typed fetch wrapper
-│   │   └── supabase.ts           # Supabase clients
-│   ├── middleware.ts              # Route protection
+│   │   └── api.ts                # Typed fetch wrapper
 │   ├── tailwind.config.ts         # Tailwind + Raleway config
 │   └── .env.local.example
 │
@@ -220,8 +198,7 @@ sequenceDiagram
 | Layer | Technology |
 |---|---|
 | **API** | Go 1.23, Chi router, pgx v5 |
-| **Database** | Supabase (managed PostgreSQL via pgx) |
-| **Auth** | Supabase Auth (JWT validation with HS256) |
+| **Database** | PostgreSQL (via pgx — Supabase managed or local Docker) |
 | **Admin UI** | Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
 | **Font** | Raleway (via Google Fonts / next/font) |
 | **API Hosting** | Render (Docker) |
@@ -230,25 +207,21 @@ sequenceDiagram
 
 ## API Endpoints
 
-### Public (no auth required)
+All endpoints are **public** (no authentication required).
 
 | Method | Path | Description |
 |---|---|---|
 | `GET` | `/health` | Health check (DB ping → 200 or 503) |
 | `GET` | `/doctors` | List all doctors |
-| `GET` | `/doctors/{id}` | Get doctor + working hours |
-| `GET` | `/doctors/{id}/availability?date=YYYY-MM-DD` | Available slots for a date |
-
-### Protected (requires `clinic_admin` JWT)
-
-| Method | Path | Description |
-|---|---|---|
 | `POST` | `/doctors` | Create doctor |
+| `GET` | `/doctors/{id}` | Get doctor + working hours |
 | `PUT` | `/doctors/{id}` | Update doctor profile |
 | `PUT` | `/doctors/{id}/working-hours` | Set working hours (full replace) |
+| `GET` | `/doctors/{id}/availability?date=YYYY-MM-DD` | Available slots for a date |
 | `POST` | `/appointments` | Book a slot |
 | `PATCH` | `/appointments/{id}/cancel` | Cancel with reason |
 | `PATCH` | `/appointments/{id}/reschedule` | Move to new slot |
+| `GET` | `/appointments` | List appointments (?doctor_id=&status=) |
 | `GET` | `/patients` | List all patients (?search=) |
 | `POST` | `/patients` | Create patient |
 | `GET` | `/patients/{id}` | Get patient details |
@@ -260,7 +233,6 @@ sequenceDiagram
 |---|---|
 | `200` | Success (read / update) |
 | `201` | Resource created |
-| `401` | Missing or invalid JWT |
 | `404` | Resource not found |
 | `409` | State conflict (slot taken / already cancelled) |
 | `422` | Validation failure |
@@ -284,7 +256,6 @@ sequenceDiagram
 - Go 1.23+
 - Node.js 20+
 - Docker & Docker Compose
-- Supabase CLI (optional, for local Supabase)
 
 ### 1. Clone the repository
 
@@ -301,9 +272,8 @@ cd clinic-api
 # Copy environment file
 cp .env.example .env
 
-# Edit .env with your Supabase credentials (or use defaults for local dev)
+# Edit .env if needed (defaults work for local Docker PostgreSQL)
 # DATABASE_URL=postgres://postgres:postgres@localhost:5432/clinic_dev?sslmode=disable
-# SUPABASE_JWT_SECRET=your-supabase-jwt-secret
 
 # Start API + PostgreSQL
 docker compose up -d
@@ -320,9 +290,7 @@ cd clinic-admin
 # Copy environment file
 cp .env.local.example .env.local
 
-# Edit .env.local:
-# NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# Edit .env.local if needed:
 # NEXT_PUBLIC_API_URL=http://localhost:8080
 
 # Install dependencies
@@ -335,8 +303,12 @@ npm run dev
 ### 4. Apply database migrations
 
 ```bash
+# Using Supabase CLI (if using Supabase):
 cd clinic-api
-make migrate   # Requires Supabase CLI
+make migrate
+
+# Or apply manually against local PostgreSQL:
+psql postgres://postgres:postgres@localhost:5432/clinic_dev -f migrations/001_initial_schema.sql
 ```
 
 ### 5. Run tests

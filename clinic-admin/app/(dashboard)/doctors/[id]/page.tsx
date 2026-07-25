@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useParams } from "next/navigation";
 import Link from "next/link";
-import { getDoctor, setWorkingHours, Doctor, WorkingHours } from "@/lib/api";
+import { getDoctor, setWorkingHours as apiSetWorkingHours, Doctor, WorkingHours } from "@/lib/api";
 
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -15,7 +15,6 @@ for (let h = 0; h < 24; h++) {
 
 export default function DoctorSchedulePage() {
   const params = useParams();
-  const router = useRouter();
   const [doctor, setDoctor] = useState<Doctor | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -102,7 +101,7 @@ export default function DoctorSchedulePage() {
     }
 
     try {
-      await setWorkingHours(params.id as string, hours);
+      await apiSetWorkingHours(params.id as string, hours);
       setSaveMessage("Working hours saved.");
       initialRef.current = JSON.stringify(workingHours);
       setHasUnsaved(false);

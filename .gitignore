@@ -42,4 +42,4 @@ tmp/
 
 # Coverage
 coverage.out
-coverage.html
+coverage.html.bevel/

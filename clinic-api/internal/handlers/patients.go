@@ -35,7 +35,7 @@ func (h *PatientHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -43,7 +43,7 @@ func (h *PatientHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Patient name is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *PatientHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Patient email is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -66,19 +66,19 @@ func (h *PatientHandler) Create(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.Conflict("A patient with this email already exists.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(patient)
+	_ = json.NewEncoder(w).Encode(patient)
 }
 
 func (h *PatientHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -89,13 +89,13 @@ func (h *PatientHandler) List(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(patients)
+	_ = json.NewEncoder(w).Encode(patients)
 }
 
 func (h *PatientHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -106,20 +106,20 @@ func (h *PatientHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if patient == nil {
 		status, errResp := errors.NotFound("Patient with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(patient)
+	_ = json.NewEncoder(w).Encode(patient)
 }
 
 // GetAppointments returns all appointments for a patient
@@ -133,14 +133,14 @@ func (h *PatientHandler) GetAppointments(w http.ResponseWriter, r *http.Request)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if patient == nil {
 		status, errResp := errors.NotFound("Patient with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -167,7 +167,7 @@ func (h *PatientHandler) GetAppointments(w http.ResponseWriter, r *http.Request)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	defer rows.Close()
@@ -182,7 +182,7 @@ func (h *PatientHandler) GetAppointments(w http.ResponseWriter, r *http.Request)
 			status, errResp := errors.Internal()
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		appointments = append(appointments, a)
@@ -193,5 +193,5 @@ func (h *PatientHandler) GetAppointments(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(appointments)
+	_ = json.NewEncoder(w).Encode(appointments)
 }

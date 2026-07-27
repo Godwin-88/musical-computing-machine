@@ -59,13 +59,11 @@ func (r *PatientRepo) GetByID(ctx context.Context, id string) (*models.Patient, 
 func (r *PatientRepo) GetAll(ctx context.Context, search string) ([]models.Patient, error) {
 	query := `SELECT id, auth_user_id::text, name, email, phone, created_at FROM patients`
 	var args []interface{}
-	argIdx := 1
 
 	if search != "" {
-		query += ` WHERE name ILIKE $` + string(rune('0'+argIdx)) + ` OR email ILIKE $` + string(rune('0'+argIdx))
+		query += ` WHERE name ILIKE $1 OR email ILIKE $1`
 		searchPattern := "%" + search + "%"
 		args = append(args, searchPattern)
-		argIdx++
 	}
 
 	query += ` ORDER BY created_at DESC`

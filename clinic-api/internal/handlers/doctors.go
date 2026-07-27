@@ -40,7 +40,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -48,7 +48,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Doctor name is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Doctor specialisation is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -66,7 +66,7 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.Validation("Only 30-minute slots are supported in this version.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		slotDuration = *req.SlotDurationMinutes
@@ -83,13 +83,13 @@ func (h *DoctorHandler) Create(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(doctor)
+	_ = json.NewEncoder(w).Encode(doctor)
 }
 
 func (h *DoctorHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -99,7 +99,7 @@ func (h *DoctorHandler) List(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -134,7 +134,7 @@ func (h *DoctorHandler) List(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }
 
 func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
@@ -146,14 +146,14 @@ func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if doctor == nil {
 		status, errResp := errors.NotFound("Doctor with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -163,7 +163,7 @@ func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if wh == nil {
@@ -192,7 +192,7 @@ func (h *DoctorHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(resp)
+	_ = json.NewEncoder(w).Encode(resp)
 }
 
 type updateDoctorRequest struct {
@@ -208,7 +208,7 @@ func (h *DoctorHandler) Update(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -222,20 +222,20 @@ func (h *DoctorHandler) Update(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.NotFound("Doctor with id '" + id + "' not found.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		log.Printf("ERROR updating doctor %s: %v", id, err)
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(doctor)
+	_ = json.NewEncoder(w).Encode(doctor)
 }
 
 type setWorkingHoursRequest struct {
@@ -252,14 +252,14 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if doctor == nil {
 		status, errResp := errors.NotFound("Doctor with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -268,7 +268,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -278,14 +278,14 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 			status, errResp := errors.Validation("day_of_week must be between 0 (Monday) and 6 (Sunday).")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		if seenDays[wh.DayOfWeek] {
 			status, errResp := errors.Validation("Duplicate day_of_week entries are not allowed.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		seenDays[wh.DayOfWeek] = true
@@ -298,7 +298,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 				status, errResp := errors.Validation("Invalid time format. Use HH:MM.")
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(status)
-				json.NewEncoder(w).Encode(errResp)
+				_ = json.NewEncoder(w).Encode(errResp)
 				return
 			}
 		}
@@ -310,7 +310,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 				status, errResp := errors.Validation("Invalid time format. Use HH:MM.")
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(status)
-				json.NewEncoder(w).Encode(errResp)
+				_ = json.NewEncoder(w).Encode(errResp)
 				return
 			}
 		}
@@ -320,7 +320,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 			status, errResp := errors.Validation("Working hours must start and end on 30-minute boundaries.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 
@@ -328,7 +328,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 			status, errResp := errors.Validation("start_time must be before end_time.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 	}
@@ -338,7 +338,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -349,7 +349,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if wh == nil {
@@ -358,7 +358,7 @@ func (h *DoctorHandler) SetWorkingHours(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(wh)
+	_ = json.NewEncoder(w).Encode(wh)
 }
 
 func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) {
@@ -369,7 +369,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Query parameter 'date' is required in YYYY-MM-DD format.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -378,7 +378,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Query parameter 'date' is required in YYYY-MM-DD format.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -389,7 +389,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Cannot query availability for a past date.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -400,14 +400,14 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if doctor == nil {
 		status, errResp := errors.NotFound("Doctor with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -418,7 +418,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -429,7 +429,7 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -450,5 +450,5 @@ func (h *DoctorHandler) GetAvailability(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(response)
+	_ = json.NewEncoder(w).Encode(response)
 }

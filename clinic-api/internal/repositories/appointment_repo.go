@@ -111,7 +111,7 @@ func (r *AppointmentRepo) Cancel(ctx context.Context, id string, reason string) 
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	var currentStatus string
 	var a models.Appointment
@@ -163,7 +163,7 @@ func (r *AppointmentRepo) Reschedule(ctx context.Context, id string, newStartTim
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Lock the original appointment row
 	var currentStatus string

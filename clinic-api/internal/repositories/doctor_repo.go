@@ -100,7 +100,7 @@ func (r *DoctorRepo) SetWorkingHours(ctx context.Context, doctorID string, hours
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback(ctx)
+	defer func() { _ = tx.Rollback(ctx) }()
 
 	// Delete existing working hours for the doctor
 	_, err = tx.Exec(ctx, `DELETE FROM working_hours WHERE doctor_id = $1`, doctorID)

@@ -48,7 +48,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("doctor_id is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("patient_id is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -72,7 +72,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("start_time is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.Validation("Invalid start_time format. Use ISO 8601 (e.g. 2026-08-01T09:00:00Z).")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 	}
@@ -97,14 +97,14 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if doctor == nil {
 		status, errResp := errors.NotFound("Doctor with id '" + req.DoctorID + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -114,14 +114,14 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if patient == nil {
 		status, errResp := errors.NotFound("Patient with id '" + req.PatientID + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -130,7 +130,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Slot start time must align to 30-minute boundaries.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -141,7 +141,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Cannot book an appointment in the past.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -150,7 +150,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Appointments must be booked at least 1 hour in advance.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -160,7 +160,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -170,7 +170,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -192,7 +192,7 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("The requested slot is outside the doctor's working hours.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -203,20 +203,20 @@ func (h *AppointmentHandler) Book(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.Conflict("The requested slot is already booked. Please choose another time.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Location", "/appointments/"+appointment.ID)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(appointment)
+	_ = json.NewEncoder(w).Encode(appointment)
 }
 
 type cancelAppointmentRequest struct {
@@ -231,7 +231,7 @@ func (h *AppointmentHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -239,7 +239,7 @@ func (h *AppointmentHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Cancellation reason is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -247,7 +247,7 @@ func (h *AppointmentHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Validation("Cancellation reason must not exceed 500 characters.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -257,26 +257,26 @@ func (h *AppointmentHandler) Cancel(w http.ResponseWriter, r *http.Request) {
 			status, errResp := errors.NotFound("Appointment with id '" + id + "' not found.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		if err == repositories.ErrAlreadyCancelled {
 			status, errResp := errors.Conflict("Appointment '" + id + "' is already cancelled.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(appointment)
+	_ = json.NewEncoder(w).Encode(appointment)
 }
 
 type rescheduleAppointmentRequest struct {
@@ -291,7 +291,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Invalid request body")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -299,7 +299,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("new_start_time is required.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -310,7 +310,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 			status, errResp := errors.Validation("Invalid new_start_time format. Use ISO 8601.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 	}
@@ -323,14 +323,14 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 	if existingAppointment == nil {
 		status, errResp := errors.NotFound("Appointment with id '" + id + "' not found.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -338,7 +338,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Conflict("Cannot reschedule a cancelled appointment.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -347,7 +347,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("New start time must differ from the current appointment time.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -357,7 +357,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Slot start time must align to 30-minute boundaries.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -366,7 +366,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Cannot book an appointment in the past.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -374,7 +374,7 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		status, errResp := errors.Validation("Appointments must be booked at least 1 hour in advance.")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
@@ -384,33 +384,33 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 			status, errResp := errors.NotFound("Appointment with id '" + id + "' not found.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		if err == repositories.ErrSlotConflict {
 			status, errResp := errors.Conflict("The requested slot is already booked. Please choose another time.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		if err == repositories.ErrAlreadyCancelled {
 			status, errResp := errors.Conflict("Cannot reschedule a cancelled appointment.")
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(status)
-			json.NewEncoder(w).Encode(errResp)
+			_ = json.NewEncoder(w).Encode(errResp)
 			return
 		}
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(appointment)
+	_ = json.NewEncoder(w).Encode(appointment)
 }
 
 func (h *AppointmentHandler) List(w http.ResponseWriter, r *http.Request) {
@@ -425,11 +425,11 @@ func (h *AppointmentHandler) List(w http.ResponseWriter, r *http.Request) {
 		status, errResp := errors.Internal()
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(status)
-		json.NewEncoder(w).Encode(errResp)
+		_ = json.NewEncoder(w).Encode(errResp)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(appointments)
+	_ = json.NewEncoder(w).Encode(appointments)
 }

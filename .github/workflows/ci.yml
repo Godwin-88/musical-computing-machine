@@ -6,8 +6,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
     services:
       postgres:
         image: postgres:16
@@ -34,11 +32,14 @@ jobs:
         run: go mod download
         working-directory: ./clinic-api
 
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b /usr/local/bin v1.59.1
+          golangci-lint --version
+
       - name: Run linter (golangci-lint)
-        uses: golangci/golangci-lint-action@v6
-        with:
-          version: latest
-          working-directory: ./clinic-api
+        run: golangci-lint run ./...
+        working-directory: ./clinic-api
 
       - name: Apply test migrations
         run: |

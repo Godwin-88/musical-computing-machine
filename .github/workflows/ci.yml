@@ -43,7 +43,7 @@ jobs:
 
       - name: Apply test migrations
         run: |
-          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+          go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@v4.18.0
           migrate -path ./migrations -database "$TEST_DATABASE_URL" up
         working-directory: ./clinic-api
         env:

@@ -76,7 +76,7 @@ func main() {
 					status, errResp := errors.Internal()
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(status)
-					json.NewEncoder(w).Encode(errResp)
+					_ = json.NewEncoder(w).Encode(errResp)
 				}
 			}()
 			next.ServeHTTP(w, r)

@@ -379,7 +379,7 @@ Access the admin UI at [http://localhost:3000](http://localhost:3000) and the AP
 | Service | URL |
 |---|---|
 | **API** | https://musical-computing-machine-04cx.onrender.com |
-| **Admin UI** | https://clinic-admin-five.vercel.app |
+| **Admin UI** | https://clinic-admin-five.vercel.app | for testing the endpoints on forms
 
 ### Deployment triggers
 

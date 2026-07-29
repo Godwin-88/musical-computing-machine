@@ -237,6 +237,31 @@ sequenceDiagram
 | **Admin UI Hosting** | Vercel |
 | **CI/CD** | GitHub Actions |
 
+## Postman Collection
+
+A complete Postman collection is included in the repository at `clinic-api.postman_collection.json`. It contains 15 pre-configured requests that walk through the full API flow:
+
+1. **Health Check** — verify API is running
+2. **Create Doctor** — creates a doctor and stores the ID
+3. **Set Working Hours** — sets Mon-Fri working hours
+4. **List Doctors** — verify doctor was created
+5. **Get Availability** — fetch available slots for today
+6. **Create Patient** — creates a patient and stores the ID
+7. **Book Appointment** — books the first available slot
+8. **List Appointments** — verify booking with doctor/patient names
+9. **Cancel Appointment** — cancel with a reason
+10. **Cancel Already Cancelled** — verify 409 error on double-cancel
+11. **Book Another Appointment** — creates a new appointment for reschedule testing
+12. **Reschedule Appointment** — move to a different slot
+13. **Get Patient Appointments** — bonus endpoint with `include_past=true`
+14. **Validation Error** — verify 422 on missing fields
+15. **404 Not Found** — verify 404 on non-existent doctor
+
+**To use:**
+1. Open Postman
+2. Click **Import** → **Upload Files** → select `clinic-api.postman_collection.json`
+3. Run requests in order — variables are automatically chained
+
 ## API Endpoints
 
 All endpoints are **public** (no authentication required).

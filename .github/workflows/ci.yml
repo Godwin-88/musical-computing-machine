@@ -33,9 +33,11 @@ jobs:
         working-directory: ./clinic-api
 
       - name: Run linter (golangci-lint)
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v6
+        env:
+          ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
         with:
-          version: v1.64.8
+          version: v1.55.1
           working-directory: ./clinic-api
 
       - name: Apply test migrations

@@ -12,6 +12,7 @@ type Config struct {
 	DatabaseURL string
 	Port        string
 	AppEnv      string
+	CORSOrigin  string
 }
 
 func Load() *Config {
@@ -22,6 +23,7 @@ func Load() *Config {
 		DatabaseURL: os.Getenv("DATABASE_URL"),
 		Port:        os.Getenv("PORT"),
 		AppEnv:      os.Getenv("APP_ENV"),
+		CORSOrigin:  os.Getenv("CORS_ORIGIN"),
 	}
 
 	if cfg.DatabaseURL == "" {
@@ -33,7 +35,11 @@ func Load() *Config {
 	if cfg.AppEnv == "" {
 		cfg.AppEnv = "development"
 	}
+	if cfg.CORSOrigin == "" {
+		cfg.CORSOrigin = "http://localhost:3000"
+	}
 
 	fmt.Printf("Starting server in %s mode on port %s\n", cfg.AppEnv, cfg.Port)
+	fmt.Printf("CORS origin: %s\n", cfg.CORSOrigin)
 	return cfg
 }

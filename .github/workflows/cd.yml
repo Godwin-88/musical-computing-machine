@@ -73,7 +73,7 @@ jobs:
         run: npm install -g vercel@latest
       - name: Deploy Next.js to Vercel
         run: |
-          vercel --prod --token=${{ secrets.VERCEL_TOKEN }} \
+          vercel --prod --yes --token=${{ secrets.VERCEL_TOKEN }} \
             --scope ${{ secrets.VERCEL_ORG_ID }} \
             -m githubCommitSha=${{ github.sha }} \
             -m githubCommitAuthorName=${{ github.actor }} \

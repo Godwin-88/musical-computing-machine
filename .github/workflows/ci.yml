@@ -37,7 +37,7 @@ jobs:
         env:
           ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
         with:
-          version: v1.55.1
+          version: v1.64.8
           working-directory: ./clinic-api
 
       - name: Apply test migrations

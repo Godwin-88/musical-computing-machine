@@ -378,6 +378,44 @@ func (h *AppointmentHandler) Reschedule(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Validate new slot falls within working hours
+	wh, err := h.doctorRepo.GetWorkingHours(r.Context(), existingAppointment.DoctorID)
+	if err != nil {
+		status, errResp := errors.Internal()
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_ = json.NewEncoder(w).Encode(errResp)
+		return
+	}
+
+	bookedSlots, err := h.appointmentRepo.GetBookedSlotsForDate(r.Context(), existingAppointment.DoctorID, newStartTime)
+	if err != nil {
+		status, errResp := errors.Internal()
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_ = json.NewEncoder(w).Encode(errResp)
+		return
+	}
+
+	slotDuration := 30 * time.Minute
+	slots := services.GenerateSlots(wh, bookedSlots, newStartTime, now, slotDuration, 1*time.Hour)
+
+	slotFound := false
+	for _, slot := range slots {
+		if slot.Start.Equal(newStartTime) {
+			slotFound = true
+			break
+		}
+	}
+
+	if !slotFound {
+		status, errResp := errors.Validation("The requested slot is outside the doctor's working hours or is not available.")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(status)
+		_ = json.NewEncoder(w).Encode(errResp)
+		return
+	}
+
 	appointment, err := h.appointmentService.RescheduleAppointment(r.Context(), id, newStartTime)
 	if err != nil {
 		if err == repositories.ErrNotFound {

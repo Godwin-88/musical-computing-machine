@@ -2,6 +2,9 @@
 
 A full-stack clinic appointment booking system built with Go, PostgreSQL, and Next.js.
 
+- **API:** https://musical-computing-machine-04cx.onrender.com
+- **Admin UI:** https://clinic-admin-five.vercel.app
+
 ## Architecture
 
 ```mermaid
@@ -131,6 +134,35 @@ sequenceDiagram
     end
 ```
 
+## System Design
+
+### Models & Components
+
+**Domain Models:**
+- **Doctor** — name, specialisation, slot duration (default 30 min)
+- **WorkingHours** — doctor_id, day_of_week (0=Mon..6=Sun), start_time, end_time (on 30-min boundaries)
+- **Patient** — name, email (unique), phone
+- **Appointment** — doctor_id, patient_id, start_time, end_time, status (BOOKED/CANCELLED), cancellation_reason, cancelled_at
+
+**Key Components:**
+- **Handlers** — HTTP layer (Chi router), request parsing, response formatting
+- **Services** — Business logic (slot generation, validation rules)
+- **Repositories** — Data access via pgx v5 (raw SQL queries, transactions with `FOR UPDATE`/`FOR UPDATE NOWAIT`)
+- **Middleware** — Request logging, CORS, panic recovery, request ID
+
+### Key Decisions & Trade-offs
+
+| Decision | Rationale | Trade-off |
+|---|---|---|
+| **Go + Chi** over FastAPI/Django | Go's simplicity, fast compile times, excellent concurrency for API workloads. Chi is lightweight with no heavy ORM overhead. | More boilerplate for validation compared to Django REST Framework's serializers. |
+| **PostgreSQL** | Mature, excellent JSON support, `FOR UPDATE NOWAIT` for pessimistic locking, partial unique indexes for anti-double-booking. | Heavier than SQLite for local dev, but Supabase offers a managed free tier. |
+| **Partial unique index** for anti-double-booking | `CREATE UNIQUE INDEX ... WHERE status = 'BOOKED'` prevents concurrent bookings at the database level. | Requires understanding of partial indexes; not as portable to other databases. |
+| **Pessimistic locking** (FOR UPDATE / FOR UPDATE NOWAIT) | Prevents race conditions on cancel and reschedule operations without application-level mutexes. | Slightly lower throughput than optimistic locking, but correctness is paramount for bookings. |
+| **UUID primary keys** | Avoids sequential ID enumeration, works well with distributed systems (Supabase). | Slightly larger index size vs auto-increment integers. |
+| **No authentication** | MVP scope — the spec says "Patients need to book appointments online" without specifying auth. | Would need to add auth for production use (Supabase Auth or JWT). |
+| **1-hour booking buffer** | Prevents last-minute bookings where a patient might not make it in time (bonus requirement). | Hard-coded; could be configurable per-clinic in future. |
+| **Go's `time.Time` for slot generation** | Pure function, fully testable, no database dependency for generating available slots. | Requires careful timezone handling (all times in UTC). |
+
 ## Project Structure
 
 ```
@@ -198,10 +230,10 @@ sequenceDiagram
 | Layer | Technology |
 |---|---|
 | **API** | Go 1.23, Chi router, pgx v5 |
-| **Database** | PostgreSQL (via pgx — Supabase managed or local Docker) |
-| **Admin UI** | Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
+| **Database** | PostgreSQL (Supabase managed) |
+| **Admin UI** | Next.js 15 (App Router), TypeScript, Tailwind CSS, shadcn/ui |
 | **Font** | Raleway (via Google Fonts / next/font) |
-| **API Hosting** | Render (Docker) |
+| **API Hosting** | Render (Docker / native Go build) |
 | **Admin UI Hosting** | Vercel |
 | **CI/CD** | GitHub Actions |
 
@@ -303,11 +335,7 @@ npm run dev
 ### 4. Apply database migrations
 
 ```bash
-# Using Supabase CLI (if using Supabase):
-cd clinic-api
-make migrate
-
-# Or apply manually against local PostgreSQL:
+# Using psql against local PostgreSQL:
 psql postgres://postgres:postgres@localhost:5432/clinic_dev -f migrations/001_initial_schema.sql
 ```
 
@@ -332,15 +360,76 @@ cd ../clinic-admin && npm install && npm run dev
 
 Access the admin UI at [http://localhost:3000](http://localhost:3000) and the API at [http://localhost:8080](http://localhost:8080).
 
-## Public URLs
+## Deployment
+
+### CI/CD Pipeline
+
+- **CI:** Runs on every PR to `main`:
+  1. Lint with `golangci-lint` (v1.64.8)
+  2. Apply migrations to a test PostgreSQL database
+  3. Run `go test -race -coverprofile=coverage.out ./...`
+  4. Check coverage ≥ 80%
+- **CD:** On merge/push to `main`:
+  1. Runs the same test suite
+  2. Deploys Go API to Render via deploy hook
+  3. Deploys Admin UI to Vercel via `amondnet/vercel-action`
+
+### Public URLs
 
 | Service | URL |
 |---|---|
-| **API** | TBD |
-| **Admin UI** | TBD |
+| **API** | https://musical-computing-machine-04cx.onrender.com |
+| **Admin UI** | https://clinic-admin-five.vercel.app |
 
-## Deployment
+### Deployment triggers
 
-- **Branch:** `main` triggers deployment
-- **CI:** Runs on every PR — lint (`golangci-lint`) + test (`-race`, coverage ≥ 80%)
-- **CD:** On merge to `main` — deploy Go API to Render + Admin UI to Vercel
+- **Branch:** `main`
+- **API (Render):** Auto-deployed via GitHub Actions using a Render Deploy Hook
+- **Admin UI (Vercel):** Auto-deployed via Vercel CLI from GitHub Actions (requires `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` GitHub secrets)
+
+---
+
+## Section 4: AI Reflection
+
+### 1. What did you use AI for across the four sections?
+
+- **Section 1 (System Design):** AI helped generate Mermaid diagrams for the architecture overview and data flow sequence diagram. I also used it to brainstorm trade-offs for technology choices (Go vs FastAPI, UUID vs serial IDs, optimistic vs pessimistic locking).
+- **Section 2 (API Implementation):** AI helped generate Go handler boilerplate, error handling patterns, repository layer code, and the slot generation algorithm. It also helped write the test cases for `GenerateSlots`. The AI was used to create the initial structure and then iteratively refined.
+- **Section 3 (Deployment & CI/CD):** AI helped write the GitHub Actions workflow YAML files, the Dockerfile, the multi-stage build configuration, and the Render + Vercel deployment setup.
+- **Section 4 (AI Reflection):** This document itself was organized with AI assistance, though the substance of the answers reflects my own experience.
+
+### 2. Give one example where an AI suggestion improved your work. What did you prompt it with?
+
+**Prompt:** *"How should I prevent double-booking in a PostgreSQL-based clinic booking system? Consider concurrent requests."*
+
+**AI Suggestion:** Use a PostgreSQL partial unique index on `(doctor_id, start_time) WHERE status = 'BOOKED'` combined with `FOR UPDATE` row-level locking in transactions for cancel/reschedule operations. The AI explained that the partial index would catch duplicate insert attempts at the database level (returning a 23505 unique violation), while `FOR UPDATE NOWAIT` would prevent race conditions between concurrent cancel and reschedule operations on the same appointment.
+
+**Why it improved my work:** I was initially planning to handle booking conflicts entirely in application code with SELECT-then-INSERT logic, which has TOCTOU (time-of-check-time-of-use) race conditions. The AI's database-level approach is provably correct — the partial unique index guarantees no double-booking regardless of concurrent requests, and the pessimistic locking ensures consistency for state-changing operations. This is the kind of architectural decision where a second opinion added real value.
+
+### 3. Give one example where AI output was wrong or incomplete and how you caught it.
+
+**Example:** The AI generated the reschedule endpoint validation but **omitted the check for working hours** on the new slot. It validated the 30-minute boundary, checked the slot wasn't in the past, checked the 1-hour buffer, and checked for slot conflicts — but it never verified that the new time fell within the doctor's defined working hours for that day of the week.
+
+**How I caught it:** During manual testing, I created a doctor with working hours 09:00–12:00, booked an appointment at 09:30, then tried to reschedule it to 14:00. The API accepted it even though the doctor wasn't working at 2 PM. I traced through the code and noticed the `Reschedule` handler in `appointments.go` never called `doctorRepo.GetWorkingHours()` or `services.GenerateSlots()` to validate the new slot against working hours — it only checked for conflicts with other bookings.
+
+### 4. Name two decisions you made without AI. Why did you trust your own judgment there?
+
+**Decision 1: Using Go over FastAPI/Django REST Framework.**
+
+**Why I trusted my own judgment:** I've worked with FastAPI extensively and appreciate Python's rapid development speed. However, for this project I chose Go because:
+- The spec emphasises correctness and thought process over speed of delivery
+- Go's type system makes refactoring safe and catches entire classes of bugs at compile time
+- Go's standard library `net/http` + Chi provides a lightweight, predictable runtime without magic
+- The deployment surface is minimal — a single static binary vs a Python environment with dependencies
+
+For a production booking system that must handle concurrent requests correctly, I value Go's simplicity and explicitness over Python's convenience.
+
+**Decision 2: Using a partial unique index (`WHERE status = 'BOOKED'`) instead of an application-level lock.**
+
+**Why I trusted my own judgment:** I've seen too many race condition bugs caused by "check then insert" patterns in booking systems. An application-level mutex or lock would work but adds complexity and becomes a bottleneck. A database-level partial unique index:
+- Is declarative — the database guarantees the invariant
+- Has minimal performance impact (PostgreSQL checks the index on insert)
+- Handles concurrent requests automatically without any coordination code
+- Is well-documented PostgreSQL behaviour that I've used successfully before
+
+This is a pattern I've implemented in production systems, so I was confident in the trade-off even without AI validation.
